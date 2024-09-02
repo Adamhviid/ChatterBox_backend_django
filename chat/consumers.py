@@ -6,7 +6,6 @@ import uuid
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from a .env file if present
 load_dotenv()
 MONGODB_URI = os.getenv("MONGODB_URI")
 connect(db="chatterbox", host=MONGODB_URI)
