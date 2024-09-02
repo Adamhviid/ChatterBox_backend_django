@@ -21,7 +21,7 @@ from .views import hello_world
 from chat.views import index
 
 urlpatterns = [
-    path("", index),
-    path("admin/", admin.site.urls),
+    path("", index, name="index"),
     path("hello/", hello_world, name="hello_world"),
+    path("admin/", admin.site.urls),
 ]
