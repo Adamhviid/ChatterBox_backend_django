@@ -31,10 +31,6 @@ class Messages(Document):
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-
-        ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-        print(ALLOWED_HOSTS)
-
         self.userId = str(uuid.uuid4()).split("-")[0]
         self.ip = self.scope["client"][0]
         self.room_group_name = "chat_group"
@@ -81,40 +77,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             if not text_data:
-                raise ValueError("Empty message received")
+                return
+            data = json.loads(text_data)
+            message = data.get("message")
+            userId = data.get("userId")
 
-            message_data = json.loads(text_data)
-            message = message_data.get("message")
-            if not message:
-                raise ValueError("No message field in received data")
-
-            sent_at = datetime.datetime.now(datetime.timezone.utc)
-
-            try:
-                Messages(userId=self.userId, message=message, sentAt=sent_at).save()
-                print(f"Saved message from user {self.userId}")
-            except Exception as e:
-                print(f"Error saving message to database: {e}")
-
-            # Send message to room group after it is saved
+            # Broadcast message to room group
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",
                     "message": message,
-                    "userId": self.userId,
-                    "sentAt": sent_at.isoformat(),
+                    "userId": userId,
                 },
             )
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"Failed to process message: {e}")
+        except Exception as e:
+            print(f"Error processing received message: {e}")
 
     async def chat_message(self, event):
         message = event["message"]
-        user_id = event["userId"]
-        sent_at = event["sentAt"]
+        userId = event["userId"]
+
+        # Send message to WebSocket
         await self.send(
             text_data=json.dumps(
-                {"message": message, "userId": user_id, "sentAt": sent_at}
+                {
+                    "message": message,
+                    "userId": userId,
+                }
             )
         )
