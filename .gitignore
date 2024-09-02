@@ -1,4 +1,6 @@
 startup.txt
+startup.bat
+
 # Python
 *.pyc
 *.pyo
