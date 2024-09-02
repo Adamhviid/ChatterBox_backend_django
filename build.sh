@@ -1,10 +1,8 @@
-#!/bin/bash
-# Activate the virtual environment
-source ./venv/Scripts/activate
+#!/usr/bin/env bash
 
-# Install the required packages
+set -o errexit # exit on error
+
 pip install -r requirements.txt
 
-# Run database migrations
-cd chatterbox_backend
+python manage.py collectstatic --no-input
 python manage.py migrate
