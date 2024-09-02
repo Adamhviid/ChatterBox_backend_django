@@ -31,6 +31,10 @@ class Messages(Document):
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+
+        ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+        print(ALLOWED_HOSTS)
+
         self.userId = str(uuid.uuid4()).split("-")[0]
         self.ip = self.scope["client"][0]
         self.room_group_name = "chat_group"
